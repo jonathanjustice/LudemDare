@@ -1,6 +1,7 @@
 ﻿package {
 import flash.display.MovieClip;
 import flash.events.*;
+import flash.geom.Point;
 	public class Main extends MovieClip {
 		private var initialKeyLetters:Array = new Array();
 		private var initialKeyCodes:Array = new Array();
@@ -11,7 +12,12 @@ import flash.events.*;
 		private var successStreak:int = 0;
 		private var failStreak:int = 0;
 		private var textPrintout:TextPrintout = new TextPrintout();
-		private var difficulty:int=1;
+		//private var difficulty:int=1;
+		private var levels:Levels = new Levels();
+		private var beamQueue:int=0
+		private var fallingBeams:Array = new Array();
+		private var beamTimer:int=0;
+		private var beamDelay:int=120;
 		public function Main() {
 			this.addChild(textPrintout);
 			createKeyInputManager();
@@ -22,14 +28,69 @@ import flash.events.*;
 		}
 		
 		private function createBeams():void{
-			var beam:LightBeam = new LightBeam();
-			stage.addChild(beam);
+			
+			var targets:Array = new Array();
+			targets = levels.getLevelSequence();
+			trace("targets",targets);
+			//for each target keycode generated for the level
+			for(var i:int = 0;i < targets.length; i++){
+				//find the key that matches it
+				
+				for(var j:int = 0;j<keyboardKeys.length;j++){
+					if(keyboardKeys[j].getKeyCode() == targets[i]){
+						trace("keyboardKeys[j].getKeyCode()",keyboardKeys[j].getKeyCode());
+						trace("targets[i]",targets[i]);
+						var beam:LightBeam = new LightBeam(this);
+						beam.setTarget(keyboardKeys[j]);
+						trace(j);
+						fallingBeams.unshift(beam);
+						beamQueue++;
+					}
+				}
+			}
 		}
 		
 		private function runGame():void{
 			
-			//this.addEventListener(Event.ENTER_FRAME, updateLoop);
+			this.addEventListener(Event.ENTER_FRAME, updateLoop);
 			
+		}
+		
+		public function deleteBeam(beamToDelete):void{
+			//trace("beamToDelete",beamToDelete);
+			//trace("beamToDelete.parent",beamToDelete.parent);
+			var index:int = fallingBeams.indexOf(beamToDelete);
+			//trace("fallingBeams",fallingBeams,index);
+			fallingBeams.splice(index,1);
+			stage.removeChild(beamToDelete);
+		}
+		
+		private function updateLoop(e:Event):void{
+			for each(var beam:LightBeam in fallingBeams){
+				
+				if(beam.waitingInQueue == "true"){
+					//don't do anything
+				}
+				if(beam.waitingInQueue == "false"){
+					beam.updateLoop();
+				}
+				
+			}
+			beamTimer++;
+			if(beamTimer >= beamDelay){
+				
+				beamTimer=0;
+				if(beamQueue > 0){
+					stage.addChild(fallingBeams[0]);
+					
+					fallingBeams[0].waitingInQueue = "false"
+					
+					beamQueue--;
+					
+				}else{
+					createBeams();
+				}
+			}
 		}
 		
 		/*
@@ -52,13 +113,15 @@ import flash.events.*;
 					for(var j:int=0; j < currentlyPressedKeys.length; j++){
 						//if my key at [i] matches a keyCode
 						if(keyboardKeys[i].getKeyCode() == currentlyPressedKeys[j]){
+							//trace("its pressed");
 							//if my key is active
 							if(keyboardKeys[i].checkActive() == true){
+								//trace("its active");
 								keyboardKeys[i].activePressed();
 								successStreak ++;
 								failedKeyPress = false;
 								keyboardKeys[i].setCheckKeyState("true");
-								//keyboardKeys[i].getCorners();
+								
 							}
 							//if the key i pressed was not active
 							if(keyboardKeys[i].checkActive() == false){
@@ -77,8 +140,8 @@ import flash.events.*;
 						
 					}*/
 				}
-				trace("successStreak",successStreak);
-				trace("failStreak",failStreak);
+				//trace("successStreak",successStreak);
+				//trace("failStreak",failStreak);
 				//textPrintout.debugTrace("successStreak" + String(successStreak));
 				//textPrintout.debugTrace("failStreak" + String(failStreak));
 			}
@@ -92,9 +155,10 @@ import flash.events.*;
 			keyInputManager = new KeyInputManager(this,stage);
 		}
 		
+		//p is really 80
 		private function setInitialKeyLetters():void{
 			initialKeyLetters = ["Q","W","E","R","T","Y","U","I","O","P","A","S","D","F","G","H","J","K","L","Z","X","C","V","B","N","M"];
-			initialKeyCodes = [81,87,69,82,84,89,85,73,79,80,65,83,68,70,71,72,74,75,76,90,88,67,86,66,78,77];
+			initialKeyCodes =   [81 ,87, 69, 82, 84, 89, 85, 73, 79, 219, 65, 83, 68, 70, 71, 72, 74, 75, 76, 90, 88, 67, 86, 66, 78, 77];
 			textPrintout.debugTrace("Main: setInitialKeys: initialKeys:" + String(initialKeyLetters));
 		}
 		

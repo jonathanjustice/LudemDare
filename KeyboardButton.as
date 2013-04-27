@@ -2,7 +2,7 @@
 	import flash.display.MovieClip;
 	import flash.geom.Point;
 	public class KeyboardButton extends MovieClip{
-		private var isActive:Boolean = true;
+		private var isActive:Boolean = false;
 		private var currentLetter:String ="";
 		private var currentKeyCode:int =0;
 		private var debugTool;
@@ -48,10 +48,13 @@
 			//if(isActive){
 				this.gotoAndPlay("pressedInactive");
 				setActiveState(false);
+				
 			//}
 		}
 		
 		public function setActiveState(newState:Boolean):void{
+			//trace("set to active");
+			//trace("currentKeyCode",currentKeyCode);
 			isActive = newState;
 		}
 		
@@ -105,7 +108,7 @@
 			
 			corners.push(topLeft,topRight,bottomLeft,bottomRight);
 			debugTool.debugTrace("corners: " + String(corners))
-			trace(corners);
+			//trace(corners);
 			return corners;
 			
 		}
