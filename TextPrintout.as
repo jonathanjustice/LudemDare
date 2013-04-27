@@ -12,7 +12,7 @@
 		public function TextPrintout(){
 			this.addChild(textField);
 			textField.x = 25; 
-			textField.y = 25; 
+			textField.y = 525; 
 			textField.width=500;
 			textField.text = "Butts Butts Butts Butts"; 
 			

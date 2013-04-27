@@ -11,13 +11,19 @@ import flash.events.*;
 		private var successStreak:int = 0;
 		private var failStreak:int = 0;
 		private var textPrintout:TextPrintout = new TextPrintout();
+		private var difficulty:int=1;
 		public function Main() {
 			this.addChild(textPrintout);
 			createKeyInputManager();
 			setInitialKeyLetters();
 			createKeyboard();
 			runGame();
-			
+			createBeams();
+		}
+		
+		private function createBeams():void{
+			var beam:LightBeam = new LightBeam();
+			stage.addChild(beam);
 		}
 		
 		private function runGame():void{
@@ -42,12 +48,24 @@ import flash.events.*;
 			if(isKeysEnabled && currentlyPressedKeys.length > 0){
 				
 				for(var i:int=0; i< keyboardKeys.length; i++){
+					keyboardKeys[i].setCheckKeyState("notChecked");
 					for(var j:int=0; j < currentlyPressedKeys.length; j++){
+						//if my key at [i] matches a keyCode
 						if(keyboardKeys[i].getKeyCode() == currentlyPressedKeys[j]){
-							if(keyboardKeys[i].checkButton() == true){
+							//if my key is active
+							if(keyboardKeys[i].checkActive() == true){
 								keyboardKeys[i].activePressed();
 								successStreak ++;
 								failedKeyPress = false;
+								keyboardKeys[i].setCheckKeyState("true");
+								//keyboardKeys[i].getCorners();
+							}
+							//if the key i pressed was not active
+							if(keyboardKeys[i].checkActive() == false){
+								if(keyboardKeys[i].getCheckKeyState() != "true"){
+									keyboardKeys[i].setCheckKeyState("false");
+									keyboardKeys[i].inactivePressed();
+								}
 							}
 						}
 					}
@@ -55,10 +73,13 @@ import flash.events.*;
 				if(failedKeyPress){
 					failStreak++;
 					streakBrokenLogic();
+					/*for(var j:int=0; j < currentlyPressedKeys.length; j++){
+						
+					}*/
 				}
 				trace("successStreak",successStreak);
 				trace("failStreak",failStreak);
-				textPrintout.debugTrace("successStreak" + String(successStreak));
+				//textPrintout.debugTrace("successStreak" + String(successStreak));
 				//textPrintout.debugTrace("failStreak" + String(failStreak));
 			}
 		}
