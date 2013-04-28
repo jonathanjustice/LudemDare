@@ -10,7 +10,7 @@
 		private var target:MovieClip = new MovieClip();
 		private var fallProgress:int=1;
 		private var isActive:Boolean = false;
-		private var collideTimeRange:int = 90;
+		private var collideTimeRange:int = 65;
 		private var main;
 		public var waitingInQueue:String="true";
 		public function LightBeam(document) {
@@ -43,18 +43,27 @@
 			if(fallProgress > collideTimeRange){
 				isActive = true;
 				target.setActiveState(true);
-				
 			}
-			if(fallProgress >= 100){
+			if(fallProgress >= 110){
+				isActive = false;
 				target.setActiveState(false);
 				this.removeEventListener(Event.ENTER_FRAME,updateLoop);
+				if(target.getSuccesfullyPressed() == false){
+					target.beginFailAnimation();
+					main.incrementFailCount();
+				}
 				main.deleteBeam(this);
+				trace("delete");
 			}
 		}
 		
 		
 		public function setTarget(newTarget:MovieClip):void{
 			target = newTarget;
+		}
+		
+		public function getTarget():MovieClip{
+			return target;
 		}
 		
 		public function drawBeam():void{

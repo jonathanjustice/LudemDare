@@ -5,10 +5,19 @@
 		private var keysCurrentlyPressed:Array = new Array();
 		private var theStage;
 		private var main;
+		private var firstPress:Boolean=false;
 		public function KeyInputManager(document,stageRef){
 			main = document;
 			theStage = stageRef;
 			setUp();
+		}
+		
+		public function getFirstPress():Boolean{
+			return firstPress;
+		}
+		
+		public function setFirstPress(newState:Boolean):void{
+			firstPress = newState;
 		}
 		
 		private function setUp():void{
@@ -40,6 +49,7 @@
 				//trace("DOWN:",keysCurrentlyPressed);
 			}
 			main.checkKeys();
+			setFirstPress(true);
 		}
 		
 		private function keyUpHandler(e:KeyboardEvent):void{

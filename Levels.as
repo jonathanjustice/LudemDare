@@ -40,14 +40,16 @@ import flash.display.MovieClip;
 		private var easyLevels:Array = new Array();
 		private var mediumLevels:Array = new Array();
 		private var hardLevels:Array = new Array();
+		private var insaneLevels:Array = new Array();
+		private var stupidLevels:Array = new Array();
 		public function Levels (){
 			
 			theWorstFunction();
 			//easyLevels.push(e1, e2, e3, e4, e5, e6, e7, e8, e9, e10);
 			easyLevels.push(e0);
-			//easyLevels.push(e1);
-			//easyLevels.push(e2);
-			//easyLevels.push(e3);
+			easyLevels.push(e1);
+			easyLevels.push(e2);
+			easyLevels.push(e3);
 			/*easyLevels.push(e4);
 			easyLevels.push(e5);
 			easyLevels.push(e6);
@@ -73,6 +75,36 @@ import flash.display.MovieClip;
 			//trace("easyLevels",easyLevels);
 		}
 		
+		public function getDelay():Array{
+			var keyDelay:int=0;
+			var groupDelay:int=0;
+			var delays:Array = new Array();
+			switch(difficulty) {
+				case 0://60 to 90
+					keyDelay = 60+ Math.floor(Math.random() * 30);
+					groupDelay = keyDelay*2;
+					break;
+				case 1://50 to 80
+					keyDelay = 50+ Math.floor(Math.random() * 30);
+					groupDelay = keyDelay*2;
+					break;
+				case 2://40 to 75
+					keyDelay = 40+ Math.floor(Math.random() * 25);
+					groupDelay = keyDelay*2;
+					break;
+				case 3://30 to 50
+					keyDelay = 30+ Math.floor(Math.random() * 20);
+					groupDelay = keyDelay*2;
+					break;
+				case 4://15 to 30
+					keyDelay = 15+ Math.floor(Math.random() * 15);
+					groupDelay = keyDelay*2;
+					break;
+			}
+			delays=[keyDelay,groupDelay]
+			return delays;
+		}
+		
 		public function getLevelSequence():Array {
 			var sequence:Array = new Array();
 			var chunk:int = 0;
@@ -81,24 +113,40 @@ import flash.display.MovieClip;
 					chunk = Math.floor(Math.random() * easyLevels.length);
 					sequence = easyLevels;
 					break;
-				/*case 1:
+				case 1:
 					chunk = Math.floor(Math.random() * mediumLevels.length);
 					sequence = mediumLevels;
 					break;
 				case 2:
 					chunk = Math.floor(Math.random() * hardLevels.length);
 					sequence = hardLevels;
-					break;*/
+					break;
+				case 3:
+					chunk = Math.floor(Math.random() * insaneLevels.length);
+					sequence = insaneLevels;
+					break;
+				case 4:
+					chunk = Math.floor(Math.random() * stupidLevels.length);
+					sequence = stupidLevels;
+					break;
 			}
-			trace("chunk",chunk);
-			trace("sequence",sequence);
-			trace("sequence[chunk]",sequence[chunk]);
+			//trace("chunk",chunk);
+			//trace("sequence",sequence);
+			//trace("sequence[chunk]",sequence[chunk]);
 			return sequence[chunk];
 			
 		}
 		
+		public function setDifficulty(diff:int):void{
+			difficulty = diff;
+		}
+		
+		public function getDifficulty():int{
+			return difficulty;
+		}
+		
 		private function theWorstFunction():void{
-			e0 = [219];
+			e0 = [80];
 			e1 = [81,87];
 			e2 = [90,88,67];
 			e3 = [83];

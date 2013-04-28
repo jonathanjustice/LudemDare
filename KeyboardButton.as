@@ -7,6 +7,8 @@
 		private var currentKeyCode:int =0;
 		private var debugTool;
 		private var checkState:String="notChecked";
+		private var beam:MovieClip;
+		private var successfullyPressed:Boolean=false;
 		
 		public function KeyboardButton(debug){
 			//trace("keyboarBytton");
@@ -38,18 +40,15 @@
 		}
 		
 		public function activePressed():void{
-			//if(isActive){
-				this.gotoAndPlay("pressedActive");
-				setActiveState(false);
-			//}
+			successfullyPressed = true;
+			this.gotoAndPlay("pressedActive");
+			setActiveState(false);
+			beginSuccessAnimation();
 		}
 		
 		public function inactivePressed():void{
-			//if(isActive){
-				this.gotoAndPlay("pressedInactive");
-				setActiveState(false);
-				
-			//}
+			this.gotoAndPlay("pressedInactive");
+			setActiveState(false);
 		}
 		
 		public function setActiveState(newState:Boolean):void{
@@ -60,6 +59,18 @@
 		
 		private function animationLogic():void{
 			
+		}
+		
+		public function setBeam(newBeam:MovieClip):void{
+			beam = newBeam;
+		}
+		
+		public function getBeam():MovieClip{
+			return beam;
+		}
+		
+		public function getSuccesfullyPressed():Boolean{
+			return successfullyPressed;
 		}
 		
 		public function setLetter(letter:String):void{
@@ -84,6 +95,22 @@
 			centerPoint.x = this.x +this.width/2;
 			centerPoint.y = this.y +this.height/2;
 			return centerPoint;
+		}
+		
+		public function beginGlowAnimation():void{
+			background.gotoAndPlay(1);
+		}
+		
+		public function beginFailAnimation():void{
+			background.gotoAndPlay("fail");
+		}
+		
+		public function beginSuccessAnimation():void{
+			background.gotoAndPlay("success");
+		}
+		
+		public function resetAnimation():void{
+			background.gotoAndStop(1);
 		}
 		
 		public function getCorners():Array{
