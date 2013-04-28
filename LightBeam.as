@@ -22,38 +22,44 @@
 		}
 		
 		public function updateLoop():void{
-			fallProgress++;
-			beam.gotoAndPlay(fallProgress);
-			beam.square.left.gotoAndPlay(fallProgress);
-			beam.square.right.gotoAndPlay(fallProgress);
-			beam.square.top.gotoAndPlay(fallProgress);
-			beam.square.bottom.gotoAndPlay(fallProgress);
-			if(this.x < target.x + 30){
-				this.x += 10;
-			}
-			if(this.x > target.x + 30){
-				this.x -= 10;
-			}
-			if(this.y < target.y + 30){
-				this.y += 10;
-			}
-			if(this.y > target.y +30){
-				this.y -= 10;
-			}
-			if(fallProgress > collideTimeRange){
-				isActive = true;
-				target.setActiveState(true);
-			}
-			if(fallProgress >= 110){
-				isActive = false;
-				target.setActiveState(false);
-				this.removeEventListener(Event.ENTER_FRAME,updateLoop);
-				if(target.getSuccesfullyPressed() == false){
-					target.beginFailAnimation();
-					main.incrementFailCount();
+			if(waitingInQueue == "true"){
+			this.visible = false;
+			}else if(waitingInQueue == "false"){
+				fallProgress++;
+				beam.gotoAndPlay(fallProgress);
+				beam.square.left.gotoAndPlay(fallProgress);
+				beam.square.right.gotoAndPlay(fallProgress);
+				beam.square.top.gotoAndPlay(fallProgress);
+				beam.square.bottom.gotoAndPlay(fallProgress);
+				this.visible = true;
+				if(this.x < target.x + 30){
+					this.x += 10;
 				}
-				main.deleteBeam(this);
-				trace("delete");
+				if(this.x > target.x + 30){
+					this.x -= 10;
+				}
+				if(this.y < target.y + 30){
+					this.y += 10;
+				}
+				if(this.y > target.y +30){
+					this.y -= 10;
+				}
+				if(fallProgress > collideTimeRange){
+					isActive = true;
+					target.setActiveState(true);
+				}
+				if(fallProgress >= 110){
+					isActive = false;
+					target.setActiveState(false);
+					this.removeEventListener(Event.ENTER_FRAME,updateLoop);
+					if(target.getSuccesfullyPressed() == false){
+						target.beginFailAnimation();
+						main.incrementFailCount();
+						main.soundManager.playSound_missedPress();
+					}
+					main.deleteBeam(this);
+					trace("delete");
+				}
 			}
 		}
 		

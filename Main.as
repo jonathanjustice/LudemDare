@@ -11,6 +11,7 @@ import flash.geom.Point;
 		private var keyInputManager:KeyInputManager;
 		private var successStreak:int = 0;
 		private var failStreak:int = 0;
+		private var maxFailStreak:int = 5;
 		private var totalDrops:int=0;
 		private var textPrintout:TextPrintout = new TextPrintout();
 		private var fails:TextPrintout = new TextPrintout();
@@ -19,51 +20,95 @@ import flash.geom.Point;
 		private var levels:Levels = new Levels();
 		private var beamQueue:int=0
 		private var fallingBeams:Array = new Array();
+		private var waitingBeams:Array = new Array();
 		private var beamTimer:int=0;
 		private var beamDelay:int=120;
 		private var delays:Array = new Array();
 		private var startScreen:Screen_Start = new Screen_Start();
+		private var endScreen:Screen_End = new Screen_End();
 		private var startTimer:int=0;
+		private var isGameOver:Boolean=false;
+		public var soundManager:SoundManager = new SoundManager();
 		public function Main() {
-			createKeyInputManager();
-			textPrintout.visible=false;
-			this.addChild(textPrintout);
-			this.addChild(startScreen);
-			checkForStart();
+			launchGame();
+		}
+		
+		private function launchGame():void{
 			
+			createKeyInputManager();
+			setInitialKeyLetters();
+			textPrintout.visible=false;
+			wins.visible=false;
+			fails.visible=false;
+			wins.y +=40;
+			fails.y+=20;
+			this.addChild(textPrintout);
+			this.addChild(fails);
+			this.addChild(wins);
+			createStartScreen();
+		}
+		
+		private function createStartScreen():void{
+			stage.addChild(startScreen);
+			checkForStart();
+		}
+		
+		private function createEndScreen():void{
+			trace("createEndScreen");
+			keyInputManager.setFirstPress(false);
+			stage.addChild(endScreen);
+			checkForStart();
 		}
 		
 		private function checkForStart():void{
-			trace("check for start");
 			this.addEventListener(Event.ENTER_FRAME, pressTheAnyKey);
-			
 		}
 		
 		private function pressTheAnyKey(e:Event):void{
-			if(keyInputManager.getFirstPress()==true){
-				startTimer++;
-				startScreen.alpha-=.03
-				if(startTimer > 56){
-					keyInputManager.setFirstPress(false);
-					this.removeChild(startScreen);
-					this.removeEventListener(Event.ENTER_FRAME, pressTheAnyKey);
-					startGame();
-					trace("start");
+			if(isGameOver == false){
+				if(keyInputManager.getFirstPress()==true){
+					startTimer++;
+					startScreen.alpha-=.03;
+					if(startTimer > 56){
+						keyInputManager.setFirstPress(false);
+						stage.removeChild(startScreen);
+						this.removeEventListener(Event.ENTER_FRAME, pressTheAnyKey);
+						startGame();
+					}
+				}
+			}else if(isGameOver == true){
+				if(keyInputManager.getFirstPress()==true){
+					startTimer++;
+					endScreen.alpha-=.03;
+					if(startTimer > 56){
+						keyInputManager.setFirstPress(false);
+						stage.removeChild(endScreen);
+						endScreen.alpha = 1;
+						this.removeEventListener(Event.ENTER_FRAME, pressTheAnyKey);
+						startGame();
+					}
 				}
 			}
 		}
 		
 		private function startGame():void{
-			this.addChild(fails);
-			this.addChild(wins);
-			wins.y +=40;
-			fails.y+=20;
-			textPrintout.visible=true;
-			setInitialKeyLetters();
+			isGameOver = false;
+			//textPrintout.visible=true;
+			
 			createKeyboard();
 			runGame();
-			checkForStart();
 			createBeams();
+		}
+		
+		
+		
+		public function deleteBeam(beamToDelete):void{
+			//trace("beamToDelete",beamToDelete);
+			//trace("beamToDelete.parent",beamToDelete.parent);
+			var index:int = fallingBeams.indexOf(beamToDelete);
+			//trace("fallingBeams",fallingBeams,index);
+			fallingBeams.splice(index,1);
+			stage.removeChild(beamToDelete);
 		}
 		
 		private function createBeams():void{
@@ -77,36 +122,19 @@ import flash.geom.Point;
 				
 				for(var j:int = 0;j<keyboardKeys.length;j++){
 					if(keyboardKeys[j].getKeyCode() == targets[i]){
-						//trace("keyboardKeys[j].getKeyCode()",keyboardKeys[j].getKeyCode());
+						trace("MATCH!: keyboardKeys[j].getKeyCode() is :",keyboardKeys[j].getKeyCode());
 						//trace("targets[i]",targets[i]);
 						var beam:LightBeam = new LightBeam(this);
 						beam.setTarget(keyboardKeys[j]);
 						keyboardKeys[j].setBeam(beam);
-						fallingBeams.unshift(beam);
+						waitingBeams.push(beam);
+						beam.visible=false;
+						stage.addChild(beam);
 						beamQueue++;
 					}
 				}
 			}
-		}
-		
-		private function runGame():void{
-			
-			this.addEventListener(Event.ENTER_FRAME, updateLoop);
-			
-		}
-		
-		public function incrementFailCount():void{
-			failStreak++;
-			
-		}
-		
-		public function deleteBeam(beamToDelete):void{
-			//trace("beamToDelete",beamToDelete);
-			//trace("beamToDelete.parent",beamToDelete.parent);
-			var index:int = fallingBeams.indexOf(beamToDelete);
-			//trace("fallingBeams",fallingBeams,index);
-			fallingBeams.splice(index,1);
-			stage.removeChild(beamToDelete);
+			trace("fallingBeams.length:",fallingBeams.length);
 		}
 		
 		private function updateLoop(e:Event):void{
@@ -125,22 +153,34 @@ import flash.geom.Point;
 			
 			if(beamQueue > 0){
 				if(beamTimer >= delays[0]){
-					fallingBeams[0].getTarget().beginGlowAnimation();
-					stage.addChild(fallingBeams[0]);
-					fallingBeams[0].waitingInQueue = "false"
+					trace("waitingBeams[0] is now falling");
+					waitingBeams[0].getTarget().beginGlowAnimation();//the key targeted by the beam glows
+					
+					waitingBeams[0].waitingInQueue = "false"
+					waitingBeams[0].visible=true;
+					//shift it into a new array
+					fallingBeams.push(waitingBeams.shift())
+					
 					beamQueue--;
 					beamTimer=0;
 					totalDrops++;
+					trace("beamQueue",beamQueue);
 				}
 				
 			}else{
-				if(beamTimer >= delays[1]){
+				
+				if(beamTimer >= delays[1] && fallingBeams.length == 0){
+					trace("NO BEAMS LEFT:",fallingBeams.length);
 					createBeams();
 					beamTimer=0;
 				}
 			}
 			
 			streakLogic();
+			if(failStreak > maxFailStreak){
+				clearGame();
+				soundManager.playSound_gameOver();
+			}
 		}
 		
 		/*
@@ -168,6 +208,7 @@ import flash.geom.Point;
 							if(keyboardKeys[i].checkActive() == true){
 								//trace("its active");
 								keyboardKeys[i].activePressed();
+								soundManager.playSound_hit();
 								successStreak ++;
 								failedKeyPress = false;
 								keyboardKeys[i].setCheckKeyState("true");
@@ -178,22 +219,18 @@ import flash.geom.Point;
 								if(keyboardKeys[i].getCheckKeyState() != "true"){
 									keyboardKeys[i].setCheckKeyState("false");
 									keyboardKeys[i].inactivePressed();
+									
 								}
 							}
 						}
 					}
 				}
+				//if you pressed a wrong key
 				if(failedKeyPress){
+					soundManager.playSound_hitWrong();
 					incrementFailCount();
 					streakBrokenLogic();
-					/*for(var j:int=0; j < currentlyPressedKeys.length; j++){
-						
-					}*/
 				}
-				//trace("successStreak",successStreak);
-				//trace("failStreak",failStreak);
-				//textPrintout.debugTrace("successStreak" + String(successStreak));
-				//textPrintout.debugTrace("failStreak" + String(failStreak));
 			}
 		}
 		
@@ -213,7 +250,65 @@ import flash.geom.Point;
 			}else if(totalDrops >= 6 && totalDrops <= 100){
 				
 			}
+		}
+		
+		private function runGame():void{
 			
+			this.addEventListener(Event.ENTER_FRAME, updateLoop);
+			
+		}
+		
+		public function incrementFailCount():void{
+			trace("failStreak:",failStreak);
+			failStreak++;
+			
+		}
+		
+		private function clearGame():void{
+			//initialKeyLetters
+			//initialKeyCodes
+			//keyboardKeys
+			for(var i:int=0;i < keyboardKeys.length; i++){
+				//trace("clearGame: keyboardKeys:",i,": keyboardKeys.length",keyboardKeys.length);
+				stage.removeChild(keyboardKeys[i]);
+				keyboardKeys.splice(i,1);
+				i--;
+				//trace("keyboardKeys",keyboardKeys);
+				//trace("keyboardKeys.length",keyboardKeys.length);
+			}
+			isKeysEnabled = true;
+			currentlyPressedKeys = [];
+			successStreak = 0;
+			failStreak = 0;
+			//maxFailStreak
+			totalDrops = 0;
+			//textPrintout
+			//fails
+			//wins
+			//levels
+			beamQueue = 0;
+			//fallingBeams
+			trace("fallingBeams being deleted",fallingBeams);
+			for(var j:int=0;j < fallingBeams.length; j++){
+				trace(fallingBeams[j].parent);
+				stage.removeChild(fallingBeams[j]);
+				fallingBeams.splice(j,1);
+				j--;
+			}
+			//waitingBeams
+			for(var k:int=0;k < waitingBeams.length; k++){
+				trace(waitingBeams[k].parent);
+				stage.removeChild(waitingBeams[k]);
+				waitingBeams.splice(k,1);
+				j--;
+			}
+			beamTimer = 0;
+			beamDelay = 120;
+			delays = [];
+			//startScreen
+			startTimer = 0;
+			isGameOver = true;
+			createEndScreen();
 		}
 		
 		private function streakBrokenLogic():void{
@@ -229,7 +324,7 @@ import flash.geom.Point;
 		private function setInitialKeyLetters():void{
 			initialKeyLetters = ["Q","W","E","R","T","Y","U","I","O","P","A","S","D","F","G","H","J","K","L","Z","X","C","V","B","N","M"];
 			initialKeyCodes =   [81 ,87, 69, 82, 84, 89, 85, 73, 79, 80, 65, 83, 68, 70, 71, 72, 74, 75, 76, 90, 88, 67, 86, 66, 78, 77];
-			textPrintout.debugTrace("Main: setInitialKeys: initialKeys:" + String(initialKeyLetters));
+			//textPrintout.debugTrace("Main: setInitialKeys: initialKeys:" + String(initialKeyLetters));
 		}
 		
 		private function createKeyboard():void {
