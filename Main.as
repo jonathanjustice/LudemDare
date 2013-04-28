@@ -28,13 +28,46 @@ import flash.geom.Point;
 		private var endScreen:Screen_End = new Screen_End();
 		private var startTimer:int=0;
 		private var isGameOver:Boolean=false;
+		private var isGameStarted:Boolean=false;
 		public var soundManager:SoundManager = new SoundManager();
+		private var gameBackground:Background = new Background();
+		private var winAnims:Array = new Array();
 		public function Main() {
+			stage.addChild(gameBackground);
 			launchGame();
 		}
 		
-		private function launchGame():void{
+		private function createWinAnim(spawnX,spawnY):void{
+			var amount:int = 0;
+			if(totalDrops < 3){
+				amount = 3 + Math.floor(Math.random()*3);
+			}else if(totalDrops >= 3 && totalDrops < 6){
+				amount = 4 + Math.floor(Math.random()*4);
+			}
+			else if(totalDrops >= 6 && totalDrops < 9){
+				amount = 5 + Math.floor(Math.random()*5);
+			}
+			else if(totalDrops >= 9 && totalDrops < 12){
+				amount = 6 + Math.floor(Math.random()*6);
+			}
+			else if(totalDrops >= 12 && totalDrops < 9000){
+				amount = 10 + Math.floor(Math.random()*10);
+			}
 			
+			for(var i:int=0;i<amount;i++){
+				var rot:int = (359/i) + Math.floor(1+(Math.random()*360));
+				var anim:winAnim = new winAnim();
+				anim.setNewPropoerties(this,rot,totalDrops);
+				anim.x = spawnX+30;
+				anim.y = spawnY+30;
+				winAnims.push(anim);
+				stage.addChild(anim);
+			}
+			
+		}
+		
+		private function launchGame():void{
+			gameBackground.overlay.gotoAndStop(1);
 			createKeyInputManager();
 			setInitialKeyLetters();
 			textPrintout.visible=false;
@@ -54,7 +87,6 @@ import flash.geom.Point;
 		}
 		
 		private function createEndScreen():void{
-			trace("createEndScreen");
 			keyInputManager.setFirstPress(false);
 			stage.addChild(endScreen);
 			checkForStart();
@@ -98,15 +130,17 @@ import flash.geom.Point;
 			createKeyboard();
 			runGame();
 			createBeams();
+			isGameStarted=true;
 		}
 		
-		
+		public function deleteWinAnim(anim):void{
+			var index:int = winAnims.indexOf(anim);
+			winAnims.splice(index,1);
+			stage.removeChild(anim);
+		}
 		
 		public function deleteBeam(beamToDelete):void{
-			//trace("beamToDelete",beamToDelete);
-			//trace("beamToDelete.parent",beamToDelete.parent);
 			var index:int = fallingBeams.indexOf(beamToDelete);
-			//trace("fallingBeams",fallingBeams,index);
 			fallingBeams.splice(index,1);
 			stage.removeChild(beamToDelete);
 		}
@@ -115,14 +149,13 @@ import flash.geom.Point;
 			delays = levels.getDelay();
 			var targets:Array = new Array();
 			targets = levels.getLevelSequence();
-			trace("targets",targets);
 			//for each target keycode generated for the level
 			for(var i:int = 0;i < targets.length; i++){
 				//find the key that matches it
 				
 				for(var j:int = 0;j<keyboardKeys.length;j++){
 					if(keyboardKeys[j].getKeyCode() == targets[i]){
-						trace("MATCH!: keyboardKeys[j].getKeyCode() is :",keyboardKeys[j].getKeyCode());
+						//trace("MATCH!: keyboardKeys[j].getKeyCode() is :",keyboardKeys[j].getKeyCode());
 						//trace("targets[i]",targets[i]);
 						var beam:LightBeam = new LightBeam(this);
 						beam.setTarget(keyboardKeys[j]);
@@ -134,10 +167,12 @@ import flash.geom.Point;
 					}
 				}
 			}
-			trace("fallingBeams.length:",fallingBeams.length);
 		}
 		
 		private function updateLoop(e:Event):void{
+			for each(var anim:winAnim in winAnims){
+				anim.updateLoop();
+			}
 			
 			for each(var beam:LightBeam in fallingBeams){
 				
@@ -153,7 +188,6 @@ import flash.geom.Point;
 			
 			if(beamQueue > 0){
 				if(beamTimer >= delays[0]){
-					trace("waitingBeams[0] is now falling");
 					waitingBeams[0].getTarget().beginGlowAnimation();//the key targeted by the beam glows
 					
 					waitingBeams[0].waitingInQueue = "false"
@@ -164,13 +198,11 @@ import flash.geom.Point;
 					beamQueue--;
 					beamTimer=0;
 					totalDrops++;
-					trace("beamQueue",beamQueue);
 				}
 				
 			}else{
 				
 				if(beamTimer >= delays[1] && fallingBeams.length == 0){
-					trace("NO BEAMS LEFT:",fallingBeams.length);
 					createBeams();
 					beamTimer=0;
 				}
@@ -199,7 +231,6 @@ import flash.geom.Point;
 			if(isKeysEnabled && currentlyPressedKeys.length > 0){
 				
 				for(var i:int=0; i< keyboardKeys.length; i++){
-					keyboardKeys[i].setCheckKeyState("notChecked");
 					for(var j:int=0; j < currentlyPressedKeys.length; j++){
 						//if my key at [i] matches a keyCode
 						if(keyboardKeys[i].getKeyCode() == currentlyPressedKeys[j]){
@@ -207,12 +238,13 @@ import flash.geom.Point;
 							//if my key is active
 							if(keyboardKeys[i].checkActive() == true){
 								//trace("its active");
+								keyboardKeys[i].setActiveState(false);
 								keyboardKeys[i].activePressed();
 								soundManager.playSound_hit();
 								successStreak ++;
 								failedKeyPress = false;
 								keyboardKeys[i].setCheckKeyState("true");
-								
+								createWinAnim(keyboardKeys[i].x,keyboardKeys[i].y);
 							}
 							//if the key i pressed was not active
 							if(keyboardKeys[i].checkActive() == false){
@@ -226,7 +258,8 @@ import flash.geom.Point;
 					}
 				}
 				//if you pressed a wrong key
-				if(failedKeyPress){
+				if(failedKeyPress && isGameStarted){
+					trace("failed keypress");
 					soundManager.playSound_hitWrong();
 					incrementFailCount();
 					streakBrokenLogic();
@@ -259,12 +292,13 @@ import flash.geom.Point;
 		}
 		
 		public function incrementFailCount():void{
-			trace("failStreak:",failStreak);
+			//trace("failStreak:",failStreak);
 			failStreak++;
-			
+			gameBackground.overlay.gotoAndStop(failStreak+1);
 		}
 		
 		private function clearGame():void{
+			gameBackground.overlay.gotoAndStop(1);
 			//initialKeyLetters
 			//initialKeyCodes
 			//keyboardKeys
@@ -273,8 +307,6 @@ import flash.geom.Point;
 				stage.removeChild(keyboardKeys[i]);
 				keyboardKeys.splice(i,1);
 				i--;
-				//trace("keyboardKeys",keyboardKeys);
-				//trace("keyboardKeys.length",keyboardKeys.length);
 			}
 			isKeysEnabled = true;
 			currentlyPressedKeys = [];
@@ -300,7 +332,7 @@ import flash.geom.Point;
 				trace(waitingBeams[k].parent);
 				stage.removeChild(waitingBeams[k]);
 				waitingBeams.splice(k,1);
-				j--;
+				k--;
 			}
 			beamTimer = 0;
 			beamDelay = 120;
@@ -308,6 +340,16 @@ import flash.geom.Point;
 			//startScreen
 			startTimer = 0;
 			isGameOver = true;
+			
+			isGameStarted=false;
+			
+			//winAnims
+			for(var l:int=0;l < winAnims.length; l++){
+				trace(winAnims[l].parent);
+				stage.removeChild(winAnims[l]);
+				winAnims.splice(l,1);
+				l--;
+			}
 			createEndScreen();
 		}
 		

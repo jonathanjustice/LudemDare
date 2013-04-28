@@ -16,15 +16,19 @@
 		public function LightBeam(document) {
 			main = document;
 			//drawBeam();
-			beam.x = 0;
-			beam.y = 0;
+			this.x = Math.floor(Math.random()*900);
+			this.x = Math.floor(Math.random()*650);
 			this.addChild(beam);
+			beam.alpha = 0;
 		}
 		
 		public function updateLoop():void{
 			if(waitingInQueue == "true"){
 			this.visible = false;
 			}else if(waitingInQueue == "false"){
+				if(beam.alpha<1){
+					beam.alpha+=.01;
+				}
 				fallProgress++;
 				beam.gotoAndPlay(fallProgress);
 				beam.square.left.gotoAndPlay(fallProgress);
@@ -44,7 +48,7 @@
 				if(this.y > target.y +30){
 					this.y -= 10;
 				}
-				if(fallProgress > collideTimeRange){
+				if(fallProgress == collideTimeRange){
 					isActive = true;
 					target.setActiveState(true);
 				}
@@ -58,11 +62,10 @@
 						main.soundManager.playSound_missedPress();
 					}
 					main.deleteBeam(this);
-					trace("delete");
+					
 				}
 			}
 		}
-		
 		
 		public function setTarget(newTarget:MovieClip):void{
 			target = newTarget;
