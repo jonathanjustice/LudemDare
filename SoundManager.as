@@ -14,6 +14,7 @@
 		public var s_gameOver:sound_gameOver = new sound_gameOver();
 		public var s_hitWrong:sound_wrongPress = new sound_wrongPress();
 		public var s_hitMissed:sound_missedPress = new sound_missedPress();
+		public var s_music:sound_music = new sound_music();
 		
 		
 		public function SoundManager():void {
@@ -39,6 +40,12 @@
 		
 		public function playSound_gameOver():void{
 			var soundObject:SoundObject = new SoundObject(this,s_gameOver);
+		}
+		
+		public function playSound_gameMusic():void{
+			var soundObject:SoundObject = new SoundObject(this,s_music);
+			soundObject.stopSound();
+			soundObject.playSoundonLoop(999,.15);
 		}
 	}
 }

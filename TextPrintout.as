@@ -11,9 +11,10 @@
 		private var textField:TextField = new TextField();
 		public function TextPrintout(){
 			this.addChild(textField);
-			textField.x = 25; 
-			textField.y = 525; 
+			textField.x = 250; 
+			textField.y = 550; 
 			textField.width=500;
+			//textField.textColor = 0xFFFFFF;
 			textField.text = "Butts Butts Butts Butts"; 
 			
 		}

@@ -2,6 +2,8 @@
 import flash.display.MovieClip;
 import flash.events.*;
 import flash.geom.Point;
+import flash.utils.getTimer;
+import Clock;
 	public class Main extends MovieClip {
 		private var initialKeyLetters:Array = new Array();
 		private var initialKeyCodes:Array = new Array();
@@ -32,12 +34,14 @@ import flash.geom.Point;
 		public var soundManager:SoundManager = new SoundManager();
 		private var gameBackground:Background = new Background();
 		private var winAnims:Array = new Array();
+		private var timeField:tField = new tField();
+		public var clock:Clock;
 		public function Main() {
 			stage.addChild(gameBackground);
 			launchGame();
 		}
 		
-		private function createWinAnim(spawnX,spawnY):void{
+		public function createWinAnim(spawnX:Number,spawnY:Number,rank:String,extraVelocityX:Number,extraVelocityY:Number):void{
 			var amount:int = 0;
 			if(totalDrops < 3){
 				amount = 3 + Math.floor(Math.random()*3);
@@ -53,11 +57,17 @@ import flash.geom.Point;
 			else if(totalDrops >= 12 && totalDrops < 9000){
 				amount = 10 + Math.floor(Math.random()*10);
 			}
+			if(rank == "secondary"){
+				amount = 1 + Math.floor(Math.random()*2);
+			}
+			if(rank == "tertiary"){
+				amount = 1 + Math.floor(Math.random()*3);
+			}
 			
 			for(var i:int=0;i<amount;i++){
 				var rot:int = (359/i) + Math.floor(1+(Math.random()*360));
 				var anim:winAnim = new winAnim();
-				anim.setNewPropoerties(this,rot,totalDrops);
+				anim.setNewPropoerties(this,rot,totalDrops,rank,extraVelocityX,extraVelocityY);
 				anim.x = spawnX+30;
 				anim.y = spawnY+30;
 				winAnims.push(anim);
@@ -67,18 +77,32 @@ import flash.geom.Point;
 		}
 		
 		private function launchGame():void{
+			soundManager.playSound_gameMusic();
 			gameBackground.overlay.gotoAndStop(1);
 			createKeyInputManager();
 			setInitialKeyLetters();
-			textPrintout.visible=false;
-			wins.visible=false;
-			fails.visible=false;
+			textPrintout.visible=true;
+			wins.visible=true;
+			fails.visible=true;
 			wins.y +=40;
 			fails.y+=20;
+			//fails.debugTrace("0000000000000000000000000");
+			createStartScreen();
 			this.addChild(textPrintout);
 			this.addChild(fails);
 			this.addChild(wins);
-			createStartScreen();
+			stage.addChild(timeField);
+			var time:uint = getTimer();
+			trace("clock",clock);
+			clock.testFunction();
+			var timeSinceGameStart = clock.timeElapsedSinceGameStarted();
+			timeField.txt_time.text = timeSinceGameStart;
+			
+		}
+		
+		private function updateTextField():void{
+			var timeSinceGameStart = clock.timeElapsedSinceGameStarted()
+			timeField.txt_time.text = timeSinceGameStart;
 		}
 		
 		private function createStartScreen():void{
@@ -121,6 +145,7 @@ import flash.geom.Point;
 					}
 				}
 			}
+			textPrintout.debugTrace("0000000000000000000000000000000000000");
 		}
 		
 		private function startGame():void{
@@ -170,6 +195,7 @@ import flash.geom.Point;
 		}
 		
 		private function updateLoop(e:Event):void{
+			updateTextField();
 			for each(var anim:winAnim in winAnims){
 				anim.updateLoop();
 			}
@@ -203,8 +229,10 @@ import flash.geom.Point;
 			}else{
 				
 				if(beamTimer >= delays[1] && fallingBeams.length == 0){
-					createBeams();
-					beamTimer=0;
+					if(!isGameOver){
+						createBeams();
+						beamTimer=0;
+					}
 				}
 			}
 			
@@ -244,7 +272,7 @@ import flash.geom.Point;
 								successStreak ++;
 								failedKeyPress = false;
 								keyboardKeys[i].setCheckKeyState("true");
-								createWinAnim(keyboardKeys[i].x,keyboardKeys[i].y);
+								createWinAnim(keyboardKeys[i].x,keyboardKeys[i].y,"primary",0,0);
 							}
 							//if the key i pressed was not active
 							if(keyboardKeys[i].checkActive() == false){
@@ -259,7 +287,7 @@ import flash.geom.Point;
 				}
 				//if you pressed a wrong key
 				if(failedKeyPress && isGameStarted){
-					trace("failed keypress");
+					//trace("failed keypress");
 					soundManager.playSound_hitWrong();
 					incrementFailCount();
 					streakBrokenLogic();
@@ -268,8 +296,8 @@ import flash.geom.Point;
 		}
 		
 		private function streakLogic():void{
-			fails.debugTrace("fails"+String(failStreak));
-			wins.debugTrace("wins"+String(successStreak));
+			//fails.debugTrace("fails"+String(failStreak));
+			//wins.debugTrace("wins"+String(successStreak));
 			if(totalDrops < 6){
 				levels.setDifficulty(0)
 			}else if(totalDrops >= 6 && totalDrops <= 12){
@@ -303,7 +331,6 @@ import flash.geom.Point;
 			//initialKeyCodes
 			//keyboardKeys
 			for(var i:int=0;i < keyboardKeys.length; i++){
-				//trace("clearGame: keyboardKeys:",i,": keyboardKeys.length",keyboardKeys.length);
 				stage.removeChild(keyboardKeys[i]);
 				keyboardKeys.splice(i,1);
 				i--;
@@ -320,16 +347,16 @@ import flash.geom.Point;
 			//levels
 			beamQueue = 0;
 			//fallingBeams
-			trace("fallingBeams being deleted",fallingBeams);
+			//trace("fallingBeams being deleted",fallingBeams);
 			for(var j:int=0;j < fallingBeams.length; j++){
-				trace(fallingBeams[j].parent);
+				//trace(fallingBeams[j].parent);
 				stage.removeChild(fallingBeams[j]);
 				fallingBeams.splice(j,1);
 				j--;
 			}
 			//waitingBeams
 			for(var k:int=0;k < waitingBeams.length; k++){
-				trace(waitingBeams[k].parent);
+				//trace(waitingBeams[k].parent);
 				stage.removeChild(waitingBeams[k]);
 				waitingBeams.splice(k,1);
 				k--;
@@ -345,7 +372,7 @@ import flash.geom.Point;
 			
 			//winAnims
 			for(var l:int=0;l < winAnims.length; l++){
-				trace(winAnims[l].parent);
+				//trace(winAnims[l].parent);
 				stage.removeChild(winAnims[l]);
 				winAnims.splice(l,1);
 				l--;
@@ -359,6 +386,7 @@ import flash.geom.Point;
 		
 		private function createKeyInputManager():void{
 			keyInputManager = new KeyInputManager(this,stage);
+			clock = new Clock();
 		}
 		
 		//p is really 80
@@ -370,7 +398,7 @@ import flash.geom.Point;
 		}
 		
 		private function createKeyboard():void {
-			textPrintout.debugTrace("Main: createKeyboard");
+			//textPrintout.debugTrace("Main: createKeyboard");
 			var firstKeyX:int=100;
 			var firstKeyY:int=300;
 			

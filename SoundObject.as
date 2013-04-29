@@ -9,7 +9,6 @@
 	public class SoundObject{
 		public var name:String;
 		private var soundManager;
-		//public var soundFile:Sound = new Sound(new URLRequest("audio/GuileTheme.mp3"));//if building in Flash IDE, need to specify entire filepath starting at the bin level, or be terrible and it put inside same folder as this class
 		public var soundFile:Sound = new Sound();
 		public var channel:SoundChannel = new SoundChannel();
 		private var musicSound:Sound 
@@ -20,27 +19,24 @@
 			playSound(1,.15);
 		}
 		
-		/*//argument should be the URL eventually
-		public function createSound(soundFileLocation:String):void {
-			name = soundFileLocation;
-			soundFile.addEventListener(Event.COMPLETE, loadSsound);
-		}
-		
-		private function loadSsound($evt:Event):void{
-			soundFile.removeEventListener(Event.COMPLETE, loadSsound);
-			//playSound(999, .25);
-      	}*/
-		
 		public function playSound(number_of_times_to_play:int,newVolume:Number):void{
 			var soundVolume:Number = newVolume;
 			var volume_sound_transform:SoundTransform = new SoundTransform(soundVolume,0);
             channel.soundTransform = volume_sound_transform;
 			channel = soundFile.play(0, number_of_times_to_play);
 		}
+		
+		public function playSoundonLoop(number_of_times_to_play:int,newVolume:Number):void{
+			var soundVolume:Number = newVolume;
+			var volume_sound_transform:SoundTransform = new SoundTransform(soundVolume,0);
+            channel.soundTransform = volume_sound_transform;
+			channel = soundFile.play(0, 999);
+		}
 
 		public function stopSound():void {
 			trace("soundobject: stopSound");
 			channel.stop();
+			channel.removeEventListener(Event.SOUND_COMPLETE, sound_completed);
 		}
 		
 		public function check_for_sound_complete():void {

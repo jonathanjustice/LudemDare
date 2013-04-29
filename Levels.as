@@ -17,24 +17,39 @@ import flash.display.MovieClip;
 		private var m2:Array;
 		private var m3:Array;
 		private var m4:Array;
-		/*private var m5:Array  = new Array();
-		private var m6:Array  = new Array();
-		private var m7:Array  = new Array();
-		private var m8:Array  = new Array();
-		private var m9:Array  = new Array();
-		private var m10:Array  = new Array();*/
+		private var m5:Array;
+		private var m6:Array;
+		private var m7:Array;
+		private var m8:Array;
+		private var m9:Array;
+		private var m10:Array;
 		
 		private var h1:Array;
 		private var h2:Array ;
 		private var h3:Array;
 		private var h4:Array;
-	/*	private var h5:Array  = new Array();
-		private var h6:Array  = new Array();
-		private var h7:Array  = new Array();
-		private var h8:Array  = new Array();
-		private var h8:Array  = new Array();
-		private var h9:Array  = new Array();
-		private var h10:Array  = new Array();*/
+		private var h5:Array;
+		private var h6:Array ;
+		private var h7:Array;
+		private var h8:Array;
+		
+		private var i1:Array;
+		private var i2:Array ;
+		private var i3:Array;
+		private var i4:Array;
+		private var i5:Array;
+		private var i6:Array ;
+		private var i7:Array;
+		private var i8:Array;
+		
+		private var s1:Array;
+		private var s2:Array ;
+		private var s3:Array;
+		private var s4:Array;
+		private var s5:Array;
+		private var s6:Array ;
+		private var s7:Array;
+		private var s8:Array;
 		
 		private var difficulty:int = 0;
 		private var easyLevels:Array = new Array();
@@ -62,12 +77,35 @@ import flash.display.MovieClip;
 			mediumLevels.push(m2);
 			mediumLevels.push(m3);
 			mediumLevels.push(m4);
+			mediumLevels.push(m5);
+			mediumLevels.push(m6);
+			mediumLevels.push(m7);
+			mediumLevels.push(m8);
+			mediumLevels.push(m9);
+			mediumLevels.push(m10);
 			
 			hardLevels.push(h1);
 			hardLevels.push(h2);
 			hardLevels.push(h3);
 			hardLevels.push(h4);
+			hardLevels.push(h5);
+			hardLevels.push(h6);
+			hardLevels.push(h7);
 			
+			insaneLevels.push(i1);
+			insaneLevels.push(i2);
+			insaneLevels.push(i3);
+			insaneLevels.push(i4);
+			insaneLevels.push(i5);
+			insaneLevels.push(i6);
+			
+			
+			stupidLevels.push(h1);
+			stupidLevels.push(h2);
+			stupidLevels.push(h3);
+			stupidLevels.push(h4);
+			stupidLevels.push(h5);
+			stupidLevels.push(h6);
 			
 			
 			//mediumLevels.push(m1, m2, m3, m4);
@@ -126,8 +164,8 @@ import flash.display.MovieClip;
 					sequence = insaneLevels;
 					break;
 				case 4:
-					chunk = Math.floor(Math.random() * stupidLevels.length);
-					sequence = stupidLevels;
+					chunk = Math.floor(Math.random() * insaneLevels.length);
+					sequence = insaneLevels;
 					break;
 			}
 			//trace("chunk",chunk);
@@ -146,40 +184,43 @@ import flash.display.MovieClip;
 		}
 		
 		private function theWorstFunction():void{
-			e0 = [80];
-			e1 = [81,87];
-			e2 = [90,88,67];
-			e3 = [83];
-			e4 = [76];
-			e5 = [89];
-			e6 = [89,89];
-			e7 = [70,71];
-			e8 = [72];
-			e9 = [67];
-			e10 = [87];
+			//w 87
+			//a 65
+			//s 83
+			//d 68
+			e0 = [87,65,83,67];
+			e1 = [83,65];
+			e2 = [65,67,87];
+			e3 = [68];
 			
-			m1 = [81,65,90];
-			m2 = [87,77,80];
-			m3 = [69,67,82,66];
-			m4 = [84,78,80,67];
-			/*m5 = [];
-			m6 = [];
-			m7 = [];
-			m8 = [];
-			m9 = [];
-			m10 = [];*/
+			m1 = [81,87];
+			m2 = [90,88,67];
+			m3 = [83];
+			m4 = [76];
+			m5 = [89];
+			m6 = [89,89];
+			m7 = [70,71];
+			m8 = [72];
+			m9 = [67];
+			m10 = [87];
 			
-			h1 = [69,67,82,66,66,84];
-			h2 = [80,77,89,86,81,65];
-			h3 = [69,82,70,68,87,71];
-			h4 = [74,75,76,72,76,75,76,75,74,72];
-		/*	h5 = [];
-			h6 = [];
-			h7 = [];
-			h8 = [];
-			h8 = [];
-			h9 = [];
-			h10 = [];*/
+			h1 = [81,65,90];
+			h2 = [87,77,80];
+			h3 = [69,67,82,66];
+			h4 = [84,78,80,67];
+			h5 = [90,84,65,89];
+			h6 = [84,78,80,67];
+			h7 = [85,72,73,76,79,80,87,65,83];
+			
+			
+			
+			i1 = [69,67,82,66,66,84];
+			i2 = [80,77,89,86,81,65];
+			i3 = [69,82,70,68,87,71];
+			i4 = [74,75,76,72,76,75,76,75,74,72];
+			i5 = [71,72,81,80,67,84,77,89];
+			i6 = [90,74,78,72,89,66,71,84,84,70,66,72];
+		
 		}
 	}
 }
