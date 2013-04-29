@@ -16,7 +16,7 @@
 			soundManager = manager;
 			soundFile = sound;
 			//requestSounds();
-			playSound(1,.15);
+			playSound(1,1);
 		}
 		
 		public function playSound(number_of_times_to_play:int,newVolume:Number):void{
@@ -27,14 +27,13 @@
 		}
 		
 		public function playSoundonLoop(number_of_times_to_play:int,newVolume:Number):void{
-			var soundVolume:Number = newVolume;
+			var soundVolume:Number = 0;
 			var volume_sound_transform:SoundTransform = new SoundTransform(soundVolume,0);
             channel.soundTransform = volume_sound_transform;
 			channel = soundFile.play(0, 999);
 		}
 
 		public function stopSound():void {
-			trace("soundobject: stopSound");
 			channel.stop();
 			channel.removeEventListener(Event.SOUND_COMPLETE, sound_completed);
 		}
@@ -44,7 +43,6 @@
 		}
 		
 		private function sound_completed($evt:Event):void{
-			trace("sound completed");
 			channel.stop();
 			//do some logic here
 			channel.removeEventListener(Event.SOUND_COMPLETE, sound_completed);

@@ -45,7 +45,7 @@
 		public function playSound_gameMusic():void{
 			var soundObject:SoundObject = new SoundObject(this,s_music);
 			soundObject.stopSound();
-			soundObject.playSoundonLoop(999,.15);
+			soundObject.playSoundonLoop(999,.00);
 		}
 	}
 }

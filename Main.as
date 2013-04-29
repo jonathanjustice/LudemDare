@@ -36,6 +36,8 @@ import Clock;
 		private var winAnims:Array = new Array();
 		private var timeField:tField = new tField();
 		public var clock:Clock;
+		private var timeSinceCurrentGameStart:int=0;
+		private var timegameStartedAt:int=0;
 		public function Main() {
 			stage.addChild(gameBackground);
 			launchGame();
@@ -93,15 +95,16 @@ import Clock;
 			this.addChild(wins);
 			stage.addChild(timeField);
 			var time:uint = getTimer();
-			trace("clock",clock);
-			clock.testFunction();
-			var timeSinceGameStart = clock.timeElapsedSinceGameStarted();
-			timeField.txt_time.text = timeSinceGameStart;
+			
+			var timeSinceGameStart = 0;
+			//timeField.txt_time.text = timeSinceGameStart;
 			
 		}
 		
 		private function updateTextField():void{
-			var timeSinceGameStart = clock.timeElapsedSinceGameStarted()
+			timeSinceCurrentGameStart = (getTimer()-timegameStartedAt)/1000;
+			
+			var timeSinceGameStart = clock.millisecondsToTime(timeSinceCurrentGameStart);
 			timeField.txt_time.text = timeSinceGameStart;
 		}
 		
@@ -149,6 +152,7 @@ import Clock;
 		}
 		
 		private function startGame():void{
+			timegameStartedAt = getTimer();
 			isGameOver = false;
 			//textPrintout.visible=true;
 			
@@ -195,7 +199,9 @@ import Clock;
 		}
 		
 		private function updateLoop(e:Event):void{
-			updateTextField();
+			if(!isGameOver){
+				updateTextField();
+			}
 			for each(var anim:winAnim in winAnims){
 				anim.updateLoop();
 			}
