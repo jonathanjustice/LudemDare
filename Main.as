@@ -4,6 +4,9 @@ import flash.events.*;
 import flash.geom.Point;
 import flash.utils.getTimer;
 import Clock;
+import flash.display.*;
+	import flash.display.StageAlign;
+	import flash.display.StageScaleMode;
 	public class Main extends MovieClip {
 		private var initialKeyLetters:Array = new Array();
 		private var initialKeyCodes:Array = new Array();
@@ -39,6 +42,9 @@ import Clock;
 		private var timeSinceCurrentGameStart:int=0;
 		private var timegameStartedAt:int=0;
 		public function Main() {
+			//stage.displayState = StageDisplayState.FULL_SCREEN;
+			//stage.scaleMode = StageScaleMode.NO_SCALE;
+			//stage.align = StageAlign.TOP_RIGHT;
 			stage.addChild(gameBackground);
 			launchGame();
 		}
